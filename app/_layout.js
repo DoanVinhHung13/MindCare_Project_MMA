@@ -1,14 +1,18 @@
 import { Stack } from "expo-router";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AppProvider } from "../src/contexts/AppContext";
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <PaperProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-        </Stack>
+        <AppProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="login" options={{ title: "Đăng nhập" }} />
+            <Stack.Screen name="(tabs)" options={{ title: "MindCare" }} />
+          </Stack>
+        </AppProvider>
       </PaperProvider>
     </SafeAreaProvider>
   );

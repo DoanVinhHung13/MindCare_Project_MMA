@@ -1,19 +1,86 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
-import { Button, Card, List, Switch, Text } from "react-native-paper";
+import { Button, Card, List, Switch, Text, ActivityIndicator } from "react-native-paper";
+import { useApp } from "../../src/contexts/AppContext";
 
 export default function SettingsScreen() {
-  const [notifications, setNotifications] = useState(true);
-  const [reminderPeriod, setReminderPeriod] = useState(true);
-  const [reminderOvulation, setReminderOvulation] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const {
+    user,
+    settings,
+    updateSettings,
+    logout,
+    exportData,
+    clearAllData,
+    dataLoading
+  } = useApp();
 
-  const handleExportData = () => {
-    Alert.alert(
-      "Xuất dữ liệu",
-      "Tính năng xuất dữ liệu sẽ được phát triển trong phiên bản tiếp theo.",
-      [{ text: "OK" }]
-    );
+  const [localSettings, setLocalSettings] = useState({
+    notifications: true,
+    reminderPeriod: true,
+    reminderOvulation: true,
+    darkMode: false,
+    averageCycleLength: 28,
+    averagePeriodLength: 5,
+    lastPeriodStart: null
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setLocalSettings({
+        notifications: settings.notifications?.enabled || true,
+        reminderPeriod: settings.notifications?.periodReminder || true,
+        reminderOvulation: settings.notifications?.ovulationReminder || true,
+        darkMode: settings.darkMode || false,
+        averageCycleLength: settings.averageCycleLength || 28,
+        averagePeriodLength: settings.averagePeriodLength || 5,
+        lastPeriodStart: settings.lastPeriodStart
+      });
+    }
+  }, [settings]);
+
+  const handleSettingChange = async (key, value) => {
+    const newLocalSettings = { ...localSettings, [key]: value };
+    setLocalSettings(newLocalSettings);
+
+    // Update settings in context
+    const newSettings = {
+      ...settings,
+      notifications: {
+        ...settings?.notifications,
+        enabled: key === 'notifications' ? value : localSettings.notifications,
+        periodReminder: key === 'reminderPeriod' ? value : localSettings.reminderPeriod,
+        ovulationReminder: key === 'reminderOvulation' ? value : localSettings.reminderOvulation,
+      },
+      darkMode: key === 'darkMode' ? value : localSettings.darkMode,
+      averageCycleLength: key === 'averageCycleLength' ? value : localSettings.averageCycleLength,
+      averagePeriodLength: key === 'averagePeriodLength' ? value : localSettings.averagePeriodLength,
+      lastPeriodStart: key === 'lastPeriodStart' ? value : localSettings.lastPeriodStart,
+    };
+
+    try {
+      await updateSettings(newSettings);
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể cập nhật cài đặt");
+      // Revert local state on error
+      setLocalSettings(localSettings);
+    }
+  };
+
+  const handleExportData = async () => {
+    try {
+      const result = await exportData();
+      if (result.success) {
+        Alert.alert(
+          "Xuất dữ liệu",
+          "Dữ liệu đã được chuẩn bị để xuất. Tính năng lưu file sẽ được phát triển trong phiên bản tiếp theo.",
+          [{ text: "OK" }]
+        );
+      } else {
+        Alert.alert("Lỗi", result.error);
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể xuất dữ liệu");
+    }
   };
 
   const handleDeleteData = () => {
@@ -25,15 +92,86 @@ export default function SettingsScreen() {
         {
           text: "Xóa",
           style: "destructive",
-          onPress: () => console.log("Delete data"),
+          onPress: async () => {
+            try {
+              const result = await clearAllData();
+              if (result.success) {
+                Alert.alert("Thành công", "Đã xóa tất cả dữ liệu");
+              } else {
+                Alert.alert("Lỗi", result.error);
+              }
+            } catch (error) {
+              Alert.alert("Lỗi", "Không thể xóa dữ liệu");
+            }
+          },
         },
       ]
     );
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      "Đăng xuất",
+      "Bạn có chắc chắn muốn đăng xuất?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Đăng xuất",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await logout();
+            } catch (error) {
+              Alert.alert("Lỗi", "Không thể đăng xuất");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Chưa có";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  if (dataLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#e91e63" />
+        <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* User Info */}
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              Thông tin tài khoản
+            </Text>
+          </Card.Content>
+          <List.Item
+            title="Tên"
+            description={user?.name || "Chưa có"}
+            left={(props) => <List.Icon {...props} icon="account" />}
+          />
+          <List.Item
+            title="Email"
+            description={user?.email || "Chưa có"}
+            left={(props) => <List.Icon {...props} icon="email" />}
+          />
+          <List.Item
+            title="Tuổi"
+            description={user?.age ? `${user.age} tuổi` : "Chưa có"}
+            left={(props) => <List.Icon {...props} icon="cake" />}
+          />
+        </Card>
+
         {/* Cycle Settings */}
         <Card style={styles.card}>
           <Card.Content>
@@ -43,21 +181,21 @@ export default function SettingsScreen() {
           </Card.Content>
           <List.Item
             title="Độ dài chu kỳ trung bình"
-            description="28 ngày"
+            description={`${localSettings.averageCycleLength} ngày`}
             left={(props) => <List.Icon {...props} icon="calendar-range" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => console.log("Edit cycle length")}
           />
           <List.Item
             title="Độ dài kinh nguyệt"
-            description="5 ngày"
+            description={`${localSettings.averagePeriodLength} ngày`}
             left={(props) => <List.Icon {...props} icon="calendar-clock" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => console.log("Edit period length")}
           />
           <List.Item
             title="Ngày bắt đầu chu kỳ gần nhất"
-            description="15/01/2024"
+            description={formatDate(localSettings.lastPeriodStart)}
             left={(props) => <List.Icon {...props} icon="calendar-start" />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
             onPress={() => console.log("Edit last period")}
@@ -77,8 +215,8 @@ export default function SettingsScreen() {
             left={(props) => <List.Icon {...props} icon="bell" />}
             right={() => (
               <Switch
-                value={notifications}
-                onValueChange={setNotifications}
+                value={localSettings.notifications}
+                onValueChange={(value) => handleSettingChange('notifications', value)}
                 color="#e91e63"
               />
             )}
@@ -89,9 +227,9 @@ export default function SettingsScreen() {
             left={(props) => <List.Icon {...props} icon="bell-ring" />}
             right={() => (
               <Switch
-                value={reminderPeriod}
-                onValueChange={setReminderPeriod}
-                disabled={!notifications}
+                value={localSettings.reminderPeriod}
+                onValueChange={(value) => handleSettingChange('reminderPeriod', value)}
+                disabled={!localSettings.notifications}
                 color="#e91e63"
               />
             )}
@@ -102,9 +240,9 @@ export default function SettingsScreen() {
             left={(props) => <List.Icon {...props} icon="bell-outline" />}
             right={() => (
               <Switch
-                value={reminderOvulation}
-                onValueChange={setReminderOvulation}
-                disabled={!notifications}
+                value={localSettings.reminderOvulation}
+                onValueChange={(value) => handleSettingChange('reminderOvulation', value)}
+                disabled={!localSettings.notifications}
                 color="#e91e63"
               />
             )}
@@ -124,8 +262,8 @@ export default function SettingsScreen() {
             left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
             right={() => (
               <Switch
-                value={darkMode}
-                onValueChange={setDarkMode}
+                value={localSettings.darkMode}
+                onValueChange={(value) => handleSettingChange('darkMode', value)}
                 color="#e91e63"
               />
             )}
@@ -171,6 +309,21 @@ export default function SettingsScreen() {
           </Card.Content>
         </Card>
 
+        {/* Account Actions */}
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              Tài khoản
+            </Text>
+          </Card.Content>
+          <List.Item
+            title="Đăng xuất"
+            left={(props) => <List.Icon {...props} icon="logout" />}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={handleLogout}
+          />
+        </Card>
+
         {/* About */}
         <Card style={styles.card}>
           <Card.Content>
@@ -205,6 +358,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    marginTop: 16,
+    color: '#666',
   },
   card: {
     margin: 16,

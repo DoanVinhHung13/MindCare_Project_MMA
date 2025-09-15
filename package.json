@@ -6,30 +6,37 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "server": "json-server --watch db.json --port 9999 --host 0.0.0.0",
+    "dev": "concurrently \"npm run server\" \"npm start\"",
+    "find-ip": "node scripts/find-ip.js",
+    "update-ip": "node scripts/update-ip.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
     "@react-native-async-storage/async-storage": "1.18.2",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
+    "axios": "^1.12.1",
     "expo": "~49.0.15",
+    "expo-constants": "~14.4.2",
+    "expo-linking": "~5.0.2",
     "expo-router": "2.0.0",
     "expo-status-bar": "~1.6.0",
-    "expo-linking": "~5.0.2",
-    "expo-constants": "~14.4.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-native": "0.72.6",
+    "react-native": "0.72.10",
     "react-native-calendars": "^1.1313.0",
+    "react-native-gesture-handler": "~2.12.0",
     "react-native-paper": "^5.14.5",
     "react-native-safe-area-context": "4.6.3",
     "react-native-screens": "~3.22.0",
-    "react-native-web": "~0.19.6",
-    "react-native-gesture-handler": "~2.12.0"
+    "react-native-web": "~0.19.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "concurrently": "^8.2.2",
+    "json-server": "^1.0.0-beta.3"
   },
   "private": true
 }

@@ -1,0 +1,149 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "demo@example.com",
+      "name": "Demo User",
+      "age": 25,
+      "password": "123456",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "lastLogin": "2025-09-14T04:15:33.825Z"
+    }
+  ],
+  "cycles": [
+    {
+      "id": "1",
+      "userId": "1",
+      "startDate": "2024-01-15",
+      "endDate": "2024-01-19",
+      "periodLength": 5,
+      "cycleLength": 28,
+      "symptoms": [
+        "Đau bụng kinh",
+        "Mệt mỏi"
+      ],
+      "notes": "Chu kỳ bình thường",
+      "createdAt": "2024-01-15T08:00:00.000Z",
+      "updatedAt": "2024-01-15T08:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "userId": "1",
+      "startDate": "2024-02-12",
+      "endDate": "2024-02-16",
+      "periodLength": 5,
+      "cycleLength": 28,
+      "symptoms": [
+        "Đau bụng kinh"
+      ],
+      "notes": "",
+      "createdAt": "2024-02-12T08:00:00.000Z",
+      "updatedAt": "2024-02-12T08:00:00.000Z"
+    },
+    {
+      "id": "9d85",
+      "userId": "1",
+      "startDate": "2025-09-14",
+      "endDate": null,
+      "periodLength": 5,
+      "cycleLength": 28,
+      "symptoms": [],
+      "notes": "",
+      "createdAt": "2025-09-14T04:19:50.806Z",
+      "updatedAt": "2025-09-14T04:19:50.806Z"
+    },
+    {
+      "id": "6878",
+      "userId": "1",
+      "startDate": "2025-08-19",
+      "endDate": null,
+      "periodLength": 5,
+      "cycleLength": 28,
+      "symptoms": [],
+      "notes": "",
+      "createdAt": "2025-09-14T04:20:23.989Z",
+      "updatedAt": "2025-09-14T04:20:23.989Z"
+    },
+    {
+      "id": "3ef2",
+      "userId": "1",
+      "startDate": "2025-08-08",
+      "endDate": null,
+      "periodLength": 5,
+      "cycleLength": 28,
+      "symptoms": [],
+      "notes": "",
+      "createdAt": "2025-09-14T04:20:34.473Z",
+      "updatedAt": "2025-09-14T04:20:34.473Z"
+    },
+    {
+      "id": "aec4",
+      "userId": "1",
+      "startDate": "2025-09-03",
+      "endDate": null,
+      "periodLength": 5,
+      "cycleLength": 28,
+      "symptoms": [],
+      "notes": "",
+      "createdAt": "2025-09-14T04:23:39.464Z",
+      "updatedAt": "2025-09-14T04:23:39.464Z"
+    }
+  ],
+  "symptoms": [
+    {
+      "id": "1",
+      "userId": "1",
+      "date": "2024-01-15",
+      "symptoms": [
+        "Đau bụng kinh",
+        "Mệt mỏi"
+      ],
+      "mood": "Bình thường",
+      "notes": "Ngày đầu chu kỳ",
+      "createdAt": "2024-01-15T08:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "userId": "1",
+      "date": "2024-01-16",
+      "symptoms": [
+        "Đau bụng kinh"
+      ],
+      "mood": "Hơi mệt",
+      "notes": "",
+      "createdAt": "2024-01-16T08:00:00.000Z"
+    }
+  ],
+  "settings": [
+    {
+      "id": "1",
+      "userId": "1",
+      "averageCycleLength": 28,
+      "averagePeriodLength": 5,
+      "lastPeriodStart": "2024-02-12",
+      "notifications": {
+        "enabled": true,
+        "periodReminder": true,
+        "ovulationReminder": true,
+        "reminderDays": 2
+      },
+      "darkMode": false,
+      "language": "vi",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "predictions": [
+    {
+      "id": "1",
+      "userId": "1",
+      "nextPeriodStart": "2025-09-16",
+      "nextOvulationDate": "2025-09-02",
+      "fertileWindow": {
+        "start": "2025-08-28",
+        "end": "2025-09-03"
+      },
+      "lastUpdated": "2025-09-14T04:23:39.498Z"
+    }
+  ]
+}

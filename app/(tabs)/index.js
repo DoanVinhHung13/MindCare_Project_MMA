@@ -1,24 +1,76 @@
-import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { useState, useEffect } from "react";
+import { ScrollView, StyleSheet, View, Alert } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { Button, Card, FAB, Text } from "react-native-paper";
+import { Button, Card, FAB, Text, ActivityIndicator } from "react-native-paper";
+import { useApp } from "../../src/contexts/AppContext";
 
 export default function HomeScreen() {
-  const [selectedDate, setSelectedDate] = useState("");
-  const [markedDates, setMarkedDates] = useState({
-    "2024-01-15": {
-      marked: true,
-      dotColor: "#e91e63",
-      customStyles: {
-        container: { backgroundColor: "#ffebee" },
-        text: { color: "#e91e63", fontWeight: "bold" },
-      },
-    },
-  });
+  const {
+    selectedDate,
+    setSelectedDate,
+    markedDates,
+    currentCycle,
+    cycleStats,
+    predictions,
+    addCycle,
+    addSymptom,
+    getSymptomsByDate,
+    dataLoading
+  } = useApp();
+
+  const [showAddPeriodModal, setShowAddPeriodModal] = useState(false);
 
   const onDayPress = (day) => {
     setSelectedDate(day.dateString);
   };
+
+  const handleAddPeriod = async () => {
+    if (!selectedDate) {
+      Alert.alert("Lỗi", "Vui lòng chọn ngày bắt đầu chu kỳ");
+      return;
+    }
+
+    try {
+      const result = await addCycle({
+        startDate: selectedDate,
+        periodLength: cycleStats?.averagePeriodLength || 5,
+        cycleLength: cycleStats?.averageCycleLength || 28
+      });
+
+      if (result.success) {
+        Alert.alert("Thành công", "Đã thêm chu kỳ mới");
+        setShowAddPeriodModal(false);
+      } else {
+        Alert.alert("Lỗi", result.error);
+      }
+    } catch (error) {
+      Alert.alert("Lỗi", "Đã xảy ra lỗi không mong muốn");
+    }
+  };
+
+  const handleAddSymptom = () => {
+    if (!selectedDate) {
+      Alert.alert("Lỗi", "Vui lòng chọn ngày để thêm triệu chứng");
+      return;
+    }
+    // TODO: Implement symptom modal
+    Alert.alert("Thông báo", "Tính năng thêm triệu chứng sẽ được phát triển");
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Chưa có";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  if (dataLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#e91e63" />
+        <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -59,21 +111,29 @@ export default function HomeScreen() {
             <View style={styles.infoRow}>
               <Text variant="bodyMedium">Ngày bắt đầu:</Text>
               <Text variant="bodyMedium" style={styles.infoValue}>
-                15/01/2024
+                {formatDate(currentCycle?.startDate)}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text variant="bodyMedium">Ngày dự kiến rụng trứng:</Text>
               <Text variant="bodyMedium" style={styles.infoValue}>
-                29/01/2024
+                {formatDate(predictions?.nextOvulationDate)}
               </Text>
             </View>
             <View style={styles.infoRow}>
               <Text variant="bodyMedium">Chu kỳ tiếp theo:</Text>
               <Text variant="bodyMedium" style={styles.infoValue}>
-                12/02/2024
+                {formatDate(predictions?.nextPeriodStart)}
               </Text>
             </View>
+            {cycleStats && (
+              <View style={styles.infoRow}>
+                <Text variant="bodyMedium">Chu kỳ trung bình:</Text>
+                <Text variant="bodyMedium" style={styles.infoValue}>
+                  {cycleStats.averageCycleLength} ngày
+                </Text>
+              </View>
+            )}
           </Card.Content>
         </Card>
 
@@ -88,6 +148,7 @@ export default function HomeScreen() {
                 mode="contained"
                 style={styles.actionButton}
                 buttonColor="#e91e63"
+                onPress={handleAddPeriod}
               >
                 Đánh dấu ngày kinh
               </Button>
@@ -95,12 +156,39 @@ export default function HomeScreen() {
                 mode="outlined"
                 style={styles.actionButton}
                 textColor="#e91e63"
+                onPress={handleAddSymptom}
               >
                 Ghi chú triệu chứng
               </Button>
             </View>
           </Card.Content>
         </Card>
+
+        {/* Selected Date Info */}
+        {selectedDate && (
+          <Card style={styles.card}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.sectionTitle}>
+                Thông tin ngày {formatDate(selectedDate)}
+              </Text>
+              {(() => {
+                const daySymptoms = getSymptomsByDate(selectedDate);
+                return daySymptoms ? (
+                  <View>
+                    <Text variant="bodyMedium">Triệu chứng: {daySymptoms.symptoms?.join(', ') || 'Không có'}</Text>
+                    {daySymptoms.notes && (
+                      <Text variant="bodyMedium" style={styles.notes}>
+                        Ghi chú: {daySymptoms.notes}
+                      </Text>
+                    )}
+                  </View>
+                ) : (
+                  <Text variant="bodyMedium">Chưa có thông tin cho ngày này</Text>
+                );
+              })()}
+            </Card.Content>
+          </Card>
+        )}
       </ScrollView>
 
       {/* Floating Action Button */}
@@ -109,7 +197,7 @@ export default function HomeScreen() {
         style={styles.fab}
         color="#fff"
         customSize={56}
-        onPress={() => console.log("Add pressed")}
+        onPress={() => setShowAddPeriodModal(true)}
       />
     </View>
   );
@@ -119,6 +207,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    marginTop: 16,
+    color: '#666',
   },
   card: {
     margin: 16,
@@ -150,5 +248,10 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "#e91e63",
+  },
+  notes: {
+    marginTop: 8,
+    fontStyle: 'italic',
+    color: '#666',
   },
 });
