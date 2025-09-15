@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   View,
   StyleSheet,
@@ -17,9 +18,11 @@ import {
   ActivityIndicator
 } from 'react-native-paper';
 import { useApp } from '../src/contexts/AppContext';
+import Toast from 'react-native-toast-message';
 
 export default function LoginScreen() {
   const { login, register, isLoading, authError } = useApp();
+  const router = useRouter();
   
   // Form state
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -77,7 +80,7 @@ export default function LoginScreen() {
     setIsSubmitting(true);
     try {
       let result;
-      
+
       if (isLoginMode) {
         result = await login(formData.email, formData.password, formData.rememberMe);
       } else {
@@ -92,6 +95,29 @@ export default function LoginScreen() {
 
       if (!result.success) {
         Alert.alert('Lỗi', result.error);
+      } else {
+        Toast.show({
+          type: 'success',
+          text1: isLoginMode ? 'Đăng nhập thành công!' : 'Đăng ký thành công!',
+          text2: isLoginMode
+            ? 'Chào mừng bạn quay lại ứng dụng 🎉'
+            : 'Bạn đã đăng ký thành công, vui lòng đăng nhập!'
+        });
+        if (isLoginMode) {
+          router.replace('/(tabs)');
+        } else {
+          setIsLoginMode(true); // Chuyển về chế độ đăng nhập
+          setFormData({
+            email: '',
+            password: '',
+            confirmPassword: '',
+            name: '',
+            age: '',
+            rememberMe: false
+          });
+          setErrors({});
+          // Không chuyển hướng, chỉ chuyển form về login
+        }
       }
     } catch (error) {
       Alert.alert('Lỗi', 'Đã xảy ra lỗi không mong muốn');
@@ -182,7 +208,7 @@ export default function LoginScreen() {
                 )}
 
                 <TextInput
-                  label="Tuổi (tùy chọn)"
+                  label="Tuổi"
                   value={formData.age}
                   onChangeText={(value) => handleInputChange('age', value)}
                   mode="outlined"

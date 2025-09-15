@@ -109,25 +109,13 @@ export default function SettingsScreen() {
     );
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Đăng xuất",
-      "Bạn có chắc chắn muốn đăng xuất?",
-      [
-        { text: "Hủy", style: "cancel" },
-        {
-          text: "Đăng xuất",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await logout();
-            } catch (error) {
-              Alert.alert("Lỗi", "Không thể đăng xuất");
-            }
-          },
-        },
-      ]
-    );
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace('/login'); // Chuyển hướng về trang login
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể đăng xuất");
+    }
   };
 
   const formatDate = (dateString) => {
