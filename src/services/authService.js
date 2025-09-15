@@ -169,21 +169,17 @@ class AuthService {
   // Logout user
   async logout() {
     try {
-      // Clear authentication state
+      await AsyncStorage.multiRemove([
+        STORAGE_KEYS.USER_TOKEN,
+        STORAGE_KEYS.USER_DATA,
+        STORAGE_KEYS.REMEMBER_ME
+      ]);
       this.isAuthenticated = false;
       this.user = null;
       this.token = null;
-
-      // Clear storage
-      await Promise.all([
-        AsyncStorage.removeItem(STORAGE_KEYS.USER_TOKEN),
-        AsyncStorage.removeItem(STORAGE_KEYS.USER_DATA)
-      ]);
-
-      return { success: true };
+      return true;
     } catch (error) {
-      console.error('Error during logout:', error);
-      return { success: false, error: error.message };
+      return false;
     }
   }
 

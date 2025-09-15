@@ -7,7 +7,25 @@
       "age": 25,
       "password": "123456",
       "createdAt": "2024-01-01T00:00:00.000Z",
-      "lastLogin": "2025-09-14T04:15:33.825Z"
+      "lastLogin": "2025-09-15T02:20:24.891Z"
+    },
+    {
+      "id": "78ee",
+      "email": "tranducanh220604@gmail.com",
+      "name": "Tran Duc Anh",
+      "age": 21,
+      "password": "123456",
+      "createdAt": "2025-09-15T02:14:54.222Z",
+      "lastLogin": "2025-09-15T02:15:49.184Z"
+    },
+    {
+      "id": "767d",
+      "email": "nguyenvana@gmail.com",
+      "name": "Nguyen Van A",
+      "age": 20,
+      "password": "123456",
+      "createdAt": "2025-09-15T02:19:49.707Z",
+      "lastLogin": "2025-09-15T02:20:07.985Z"
     }
   ],
   "cycles": [
@@ -131,6 +149,23 @@
       "language": "vi",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-15T10:30:00.000Z"
+    },
+    {
+      "id": "7d7c",
+      "userId": "78ee",
+      "averageCycleLength": 28,
+      "averagePeriodLength": 5,
+      "lastPeriodStart": null,
+      "notifications": {
+        "enabled": true,
+        "periodReminder": true,
+        "ovulationReminder": true,
+        "reminderDays": 2
+      },
+      "darkMode": false,
+      "language": "vi",
+      "updatedAt": "2025-09-15T02:15:28.923Z",
+      "createdAt": "2025-09-15T02:15:21.893Z"
     }
   ],
   "predictions": [
